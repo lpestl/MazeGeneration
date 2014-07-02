@@ -3,11 +3,13 @@ using System.Collections;
 
 public class ScreenController : MonoBehaviour {
     public GameObject joystickMove;
-    public GameObject joystickCamera;
     public Transform followTransform;
 
     public Transform floorParent;
     public Transform wallParent;
+
+    public string namePrefabWall;
+    public string namePrefabFloor;
 
     private int _wLab = 10;
     private int _hLab = 10;
@@ -16,7 +18,6 @@ public class ScreenController : MonoBehaviour {
 	void Start () {
         var radJ = joystickMove.GetComponent<EasyJoystick>().zoneRadius;
         joystickMove.GetComponent<EasyJoystick>().joystickPosition = new Vector2(Screen.width - radJ - 20, Screen.height / 2);
-        joystickCamera.GetComponent<EasyJoystick>().joystickPosition = new Vector2(radJ + 20, Screen.height / 2);
 
         loadFloor();
 
@@ -27,7 +28,6 @@ public class ScreenController : MonoBehaviour {
 	void Update () {
         var radJ = joystickMove.GetComponent<EasyJoystick>().zoneRadius;
         joystickMove.GetComponent<EasyJoystick>().joystickPosition = new Vector2(Screen.width - radJ - 20, Screen.height / 2);
-        joystickCamera.GetComponent<EasyJoystick>().joystickPosition = new Vector2(radJ + 20, Screen.height / 2);
 
         transform.position = new Vector3(followTransform.position.x, transform.position.y, followTransform.position.z);
 	}
@@ -38,7 +38,7 @@ public class ScreenController : MonoBehaviour {
         {
             for (int j = 0; j < _hLab; j++)
             {
-                GameObject fl = Instantiate(Resources.Load("floor")) as GameObject;
+                GameObject fl = Instantiate(Resources.Load(namePrefabFloor)) as GameObject;
 
                 fl.transform.position = new Vector3(i, 0, j);
                 fl.transform.parent = floorParent;
@@ -48,108 +48,47 @@ public class ScreenController : MonoBehaviour {
         }        
     }
 
+    void loadWall(int _i, int _j, int _ang) {
+        GameObject wl = Instantiate(Resources.Load("wall")) as GameObject;
+
+        wl.transform.position = new Vector3(_i, 0, _j);
+        wl.transform.parent = wallParent;
+        wl.transform.localEulerAngles = new Vector3(0, _ang, 0);
+
+        Resources.UnloadUnusedAssets();
+    }
+
     void loadWalls()
     {
-        for (int i = 0; i < _wLab; i++)
-        {
-            for (int j = 0; j < _hLab; j++)
-            {
-                if (i == 0)
-                {
-                    GameObject wl = Instantiate(Resources.Load("wall")) as GameObject;
-
-                    wl.transform.position = new Vector3(i, 0, j);
-                    wl.transform.parent = wallParent;
-                    wl.transform.localEulerAngles = new Vector3(0, 90, 0);
-
-                    Resources.UnloadUnusedAssets();
+        // Границы по периметру
+        for (int i = 0; i < _wLab; i++) {
+            for (int j = 0; j < _hLab; j++) {
+                if (i == 0) {
+                    loadWall(i, j, 90);
                 }
 
-                if (i == _wLab - 1)
-                {
-                    if (j != 0)
-                    {
-                        GameObject wl = Instantiate(Resources.Load("wall")) as GameObject;
-
-                        wl.transform.position = new Vector3(i, 0, j);
-                        wl.transform.parent = wallParent;
-                        wl.transform.localEulerAngles = new Vector3(0, 270, 0);
-
-                        Resources.UnloadUnusedAssets();
-                    }
+                if ((i == _wLab - 1) && (j != 0)) {
+                    loadWall(i, j, 270);
                 }
 
-                if (j == 0)
-                {
-                    GameObject wl = Instantiate(Resources.Load("wall")) as GameObject;
-
-                    wl.transform.position = new Vector3(i, 0, j);
-                    wl.transform.parent = wallParent;
-                    wl.transform.localEulerAngles = new Vector3(0, 0, 0);
-
-                    Resources.UnloadUnusedAssets();
+                if (j == 0) {
+                    loadWall(i, j, 0);
                 }
 
-                if (j == _hLab - 1)
-                {
-                    GameObject wl = Instantiate(Resources.Load("wall")) as GameObject;
-
-                    wl.transform.position = new Vector3(i, 0, j);
-                    wl.transform.parent = wallParent;
-                    wl.transform.localEulerAngles = new Vector3(0, 180, 0);
-
-                    Resources.UnloadUnusedAssets();
+                if (j == _hLab - 1) {
+                    loadWall(i, j, 180);
                 }
             }
         }
-
-        //Замечание: мы предполагаем, что самая левая ячейка имеет границу слева, а самая правая — справа.
-
-        //Создайте первую строку. Ни одна ячейка не будет являться частью ни одного множества.
-        //Присвойте ячейкам, не входящим в множество, свое уникальное множество.
-        //Создайте правые границы, двигаясь слева направо:
-        //Случайно решите добавлять границу или нет
-        //Если текущая ячейка и ячейка справа принадлежат одному множеству, то создайте границу между ними (для предотвращения зацикливаний)
-        //Если вы решили не добавлять границу, то объедините два множества в которых находится текущая ячейка и ячейка справа.
-        //Создайте границы снизу, двигаясь слева направо:
-        //Случайно решите добавлять границу или нет. Убедитесь что каждое множество имеет хотя бы одну ячейку без нижней границы (для предотвращения изолирования областей)
-        //Если ячейка в своем множестве одна, то не создавайте границу снизу
-        //Если ячейка одна в своем множестве без нижней границы, то не создавайте нижнюю границу
-        //Решите, будете ли вы дальше добавлять строки или хотите закончить лабиринт
-        //Если вы хотите добавить еще одну строку, то:
-        //Выведите текущую строку
-        //Удалите все правые границы
-        //Удалите ячейки с нижней границей из их множества
-        //Удалите все нижние границы
-        //Продолжайте с шага 2
-        //Если вы решите закончить лабиринт, то:
-        //Добавьте нижнюю границу к каждой ячейке
-        //Двигаясь слева направо:
-        //Если текущая ячейка и ячейка справа члены разных множеств, то:
-        //Удалите правую границу
-        //Объедините множества текущей ячейки и ячейки справа
-        //Выведите завершающую строку
-
-
+        
         int[] line = new int[_wLab];
         int[] cell_floor = new int[_wLab];
         int[] cell_wall = new int[_wLab];
-        int[] cell = new int[_wLab * _hLab];
-        // 0 - not wall
-        // 1 - wall r
-        // 2 - wall n
-        // 3 - wall n+r
         int many = 1;
-
-        for (int i = 0; i < _hLab * _wLab; i++)
-        {
-            cell[i] = 0;
-        }
 
         //Создайте первую строку. Ни одна ячейка не будет являться частью ни одного множества.
         //Присвойте ячейкам, не входящим в множество, свое уникальное множество.
-        for (int j = 0; j < _wLab; j++)
-        {
+        for (int j = 0; j < _wLab; j++) {
             line[j] = many;
             many++;
             cell_wall[j] = 0;
@@ -157,93 +96,66 @@ public class ScreenController : MonoBehaviour {
         }
 
 
-        for (int i = 0; i < _hLab - 1; i++)
-        {
+        for (int i = 0; i < _hLab - 1; i++) {
             //Присвойте ячейкам, не входящим в множество, свое уникальное множество.
-            for (int j = 0; j < _wLab; j++)
-            {
-                if (line[j] == 0)
-                {
+            for (int j = 0; j < _wLab; j++) {
+                if (line[j] == 0) {
                     many++;
                     line[j] = many;
                 }
-                //Debug.Log(line[j]);
             }
 
             //Создайте правые границы, двигаясь слева направо:
             //Случайно решите добавлять границу или нет
-            for (int j = 0; j < _wLab; j++)
-            {
+            for (int j = 0; j < _wLab; j++) {
 
                 cell_wall[j] = Random.Range(0, 2);
                 cell_floor[j] = Random.Range(0, 2);
-                //Debug.Log(cell_wall[j]);
-                //Debug.Log(cell_floor[j]);
             }
 
-            for (int j = 0; j < _wLab - 1; j++)
-            {
+            for (int j = 0; j < _wLab - 1; j++) {
 
                 //Если текущая ячейка и ячейка справа принадлежат одному множеству, то создайте границу между ними (для предотвращения зацикливаний)
-                if (line[j] == line[j + 1])
-                {
+                if (line[j] == line[j + 1]) {
                     cell_wall[j] = 1;
                 }
 
                 //Если вы решили не добавлять границу, то объедините два множества в которых находится текущая ячейка и ячейка справа.
-                if (cell_wall[j] == 0)
-                {
-                    //line[j + 1] = line[j];
-                    //var ln = line[j];
+                if (cell_wall[j] == 0) {
                     var chln = line[j + 1];
-                    for (int k = 0; k < _wLab; k++)
-                    {
-                        if (line[k] == chln)
-                        {
+                    for (int k = 0; k < _wLab; k++) {
+                        if (line[k] == chln) {
                             line[k] = line[j];
                         }
                     }
                 }
             }
-            //Debug.Log("--------");
-            //for (int j = 0; j < _wLab; j++)
-            //{
-            //    Debug.Log(line[j]);
-            //}
+
             //Создайте границы снизу, двигаясь слева направо:
             //Случайно решите добавлять границу или нет. Убедитесь что каждое множество имеет хотя бы одну ячейку без нижней границы (для предотвращения изолирования областей)
             int[] count_hole = new int[_wLab];
             int[] count_line = new int[_wLab];
 
-            for (int j = 0; j < _wLab; j++)
-            {
+            for (int j = 0; j < _wLab; j++) {
                 count_hole[j] = 0;
                 count_line[j] = 0;
 
-                for (int k = 0; k < _wLab; k++)
-                {
-                    if (line[k] == line[j])
-                    {
+                for (int k = 0; k < _wLab; k++) {
+                    if (line[k] == line[j]) {
                         count_line[j]++;
-                        if (cell_floor[k] == 0)
-                        {
+                        if (cell_floor[k] == 0) {
                             count_hole[j]++;
                         }
                     }
                 }
-                //Debug.Log(count_line[j]);
-                //Debug.Log(count_hole[j]);
-                //Debug.Log("__________");
 
                 //Убедитесь что каждое множество имеет хотя бы одну ячейку без нижней границы (для предотвращения изолирования областей)
-                if (count_hole[j] == 0)
-                {
+                if (count_hole[j] == 0) {
                     cell_floor[j] = 0;
                 }
 
                 //Если ячейка в своем множестве одна, то не создавайте границу снизу
-                if (count_line[j] == 1)
-                {
+                if (count_line[j] == 1) {
                     cell_floor[j] = 0;
                 }
 
@@ -251,27 +163,12 @@ public class ScreenController : MonoBehaviour {
             }
             
             //Выведите текущую строку
-            for (int j = 0; j < _wLab; j++)
-            {
-                if ((cell_wall[j] == 1) && (j != _wLab-1))
-                {
-                    GameObject wl = Instantiate(Resources.Load("wall")) as GameObject;
-
-                    wl.transform.position = new Vector3(j, 0, i);
-                    wl.transform.parent = wallParent;
-                    wl.transform.localEulerAngles = new Vector3(0, 270, 0);
-
-                    Resources.UnloadUnusedAssets();
+            for (int j = 0; j < _wLab; j++) {
+                if ((cell_wall[j] == 1) && (j != _wLab-1)) {
+                    loadWall(j, i, 270);
                 }
-                if (cell_floor[j] == 1)
-                {
-                    GameObject wl = Instantiate(Resources.Load("wall")) as GameObject;
-
-                    wl.transform.position = new Vector3(j, 0, i);
-                    wl.transform.parent = wallParent;
-                    wl.transform.localEulerAngles = new Vector3(0, 180, 0);
-
-                    Resources.UnloadUnusedAssets();
+                if (cell_floor[j] == 1) {
+                    loadWall(j, i, 180);
                 }
 
                 //Удалите все правые границы
@@ -282,14 +179,6 @@ public class ScreenController : MonoBehaviour {
                 cell_floor[j] = 0;
                 //Продолжайте с шага 2
             }
-
-            //Debug.Log("########"); 
-            
-            //for (int j = 0; j < _wLab; j++)
-            //{
-            //    Debug.Log(line[j]);
-            //}
-            //Debug.Log("******");
         }
 
         //Присвойте ячейкам, не входящим в множество, свое уникальное множество.
@@ -330,13 +219,7 @@ public class ScreenController : MonoBehaviour {
 
             if (cell_wall[i] == 1)
             {
-                GameObject wl = Instantiate(Resources.Load("wall")) as GameObject;
-
-                wl.transform.position = new Vector3(i, 0, _hLab - 1);
-                wl.transform.parent = wallParent;
-                wl.transform.localEulerAngles = new Vector3(0, 270, 0);
-
-                Resources.UnloadUnusedAssets();
+                loadWall(i, _hLab - 1, 270);
             }
         }
 
