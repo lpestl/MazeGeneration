@@ -1,0 +1,4 @@
+labirint
+========
+
+Labirint generation
