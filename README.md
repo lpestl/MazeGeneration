@@ -2,3 +2,4 @@ labirint
 ========
 
 Labirint generation
+DEV
