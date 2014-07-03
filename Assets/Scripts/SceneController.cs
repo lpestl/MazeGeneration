@@ -4,14 +4,12 @@ using System.Collections;
 public class SceneController : MonoBehaviour {
 
     private bool _isMenu = true;
+    private bool _isPause = false;
+    private int _numLevel = 1;
+
     public int wMaze = 5;
     public int hMaze = 5;
-
-    SceneController getInstance()
-    {
-        return this;
-    }
-
+    
     // Use this for initialization
     void Start()
     {
@@ -20,11 +18,22 @@ public class SceneController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        //StartCoroutine(loadScene("white"));
+        if (Application.loadedLevel == 2)
+        {
+            if (GameObject.Find("EndLevel").GetComponent<TriggerEndLevel>().endLevel)
+            {
+                wMaze++;
+                hMaze++;
+                _numLevel++;
+                GameObject.Find("EndLevel").GetComponent<TriggerEndLevel>().endLevel = false;
+                StartCoroutine(loadScene("white"));
+            }
+        }
 	}
 
     void OnGUI()
     {
+        GUI.Label(new Rect(100, 5, Screen.width - 200, 50), "Level " + _numLevel + " (w:" + wMaze + "; h:" + hMaze + ")");
         if (_isMenu)
         {
             // TO DO on menu
@@ -41,6 +50,15 @@ public class SceneController : MonoBehaviour {
         else
         {
             // TO DO on scene
+            if (GUI.Button(new Rect(Screen.width - 50, 5, 45, 25), "X"))
+            {
+                _isPause = !_isPause;
+            }
+
+            if (_isPause)
+            {
+                GUI.Window(10, new Rect(15, 50, Screen.width - 30, Screen.height - 65), windowSettings, "Settings");
+            }
         }
     }
 
@@ -50,5 +68,24 @@ public class SceneController : MonoBehaviour {
         // остановка выполнения функции на 10 миллисекунд
         yield return new WaitForSeconds(0.01f);
         Application.LoadLevel(nameScene);
+    }
+
+    void windowSettings(int windowID)
+    {
+        if (GUI.Button(new Rect(25, 50, Screen.width - 80, 30), "Resume")) {
+            _isPause = false;
+        }
+
+        //if (GUI.Button(new Rect(25, 90, Screen.width - 80, 30), "Menu")) {
+        //    _isMenu = true;
+        //    StartCoroutine(loadScene("white"));
+        //    //Destroy(this);
+        //}
+
+        if (GUI.Button(new Rect(25, 130, Screen.width - 80, 30), "Quit"))
+        {
+            Application.Quit();
+        }
+
     }
 }
