@@ -5,6 +5,8 @@ public class SceneController : MonoBehaviour {
 
     private bool _isMenu = true;
     private bool _isPause = false;
+    private bool _isOrto = false;
+
     private int _numLevel = 1;
 
     public int wMaze = 5;
@@ -76,11 +78,11 @@ public class SceneController : MonoBehaviour {
             _isPause = false;
         }
 
-        //if (GUI.Button(new Rect(25, 90, Screen.width - 80, 30), "Menu")) {
-        //    _isMenu = true;
-        //    StartCoroutine(loadScene("white"));
-        //    //Destroy(this);
-        //}
+        if (GUI.Button(new Rect(25, 90, Screen.width - 80, 30), "2D / 3D"))
+        {
+            _isOrto = !_isOrto;
+            Camera.mainCamera.orthographic = _isOrto;
+        }
 
         if (GUI.Button(new Rect(25, 130, Screen.width - 80, 30), "Quit"))
         {
