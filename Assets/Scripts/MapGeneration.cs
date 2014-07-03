@@ -4,6 +4,7 @@ using System.Collections;
 public class MapGeneration : MonoBehaviour {
     public Transform floorParent;
     public Transform wallParent;
+    public Transform endTrigger;
 
     public string namePrefabWall;
     public string namePrefabFloor;
@@ -14,6 +15,10 @@ public class MapGeneration : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        var lvl = GameObject.Find("FPSandCONTROL").GetComponent<SceneController>();
+        widthLab = lvl.wMaze;
+        heightLab = lvl.hMaze;
+
         loadFloor();
         loadWalls();
 	}
@@ -257,5 +262,7 @@ public class MapGeneration : MonoBehaviour {
                 loadStolb(i, j);
             }
         }
+
+        endTrigger.position = new Vector3(endTrigger.position.x + widthLab - 1, endTrigger.position.y, endTrigger.position.z);
     }
 }
