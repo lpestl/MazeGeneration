@@ -48,12 +48,22 @@ public class ScreenController : MonoBehaviour {
         if ((Camera.mainCamera.transform.position.y - gesture.deltaPinch / 100) > 2)
         {
             Camera.mainCamera.transform.position = new Vector3(Camera.mainCamera.transform.position.x, Camera.mainCamera.transform.position.y - gesture.deltaPinch / 100, Camera.mainCamera.transform.position.z);
+            if (Camera.mainCamera.orthographic)
+            {
+                if ((Camera.mainCamera.orthographicSize - gesture.deltaPinch / 100) >= 1)
+                {
+                    Camera.mainCamera.orthographicSize = Camera.mainCamera.orthographicSize - gesture.deltaPinch / 100;
+                }
+            }
         }
     }
 
     void camYchangedMinus(Gesture gesture)
     {
         Camera.mainCamera.transform.position = new Vector3(Camera.mainCamera.transform.position.x, Camera.mainCamera.transform.position.y + gesture.deltaPinch / 100, Camera.mainCamera.transform.position.z);
-        
+        if (Camera.mainCamera.orthographic)
+        {
+            Camera.mainCamera.orthographicSize = Camera.mainCamera.orthographicSize + gesture.deltaPinch / 100;
+        }
     }
 }
