@@ -1,5 +1,4 @@
-labirint
+Maze
 ========
 
-Labirint generation
-DEV
+Maze random generation
